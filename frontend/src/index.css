@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  .dark body {
+    @apply bg-slate-950 text-slate-100;
+  }
+  ::-webkit-scrollbar { width: 7px; }
+  ::-webkit-scrollbar-track { background: #f8fafc; }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #cbd5e1, #94a3b8); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 bg-white/90 transition-all duration-200;
+  }
+  .input-field:focus {
+    @apply border-sky-500 outline-none;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.16);
+  }
+  .btn-primary {
+    @apply bg-slate-900 text-white px-5 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 inline-flex items-center justify-center gap-2;
+  }
+  .btn-primary:hover:not(:disabled) {
+    @apply bg-slate-800 -translate-y-0.5;
+    box-shadow: 0 10px 25px -10px rgba(15, 23, 42, 0.35);
+  }
+  .btn-primary:disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-white text-slate-700 px-5 py-3 rounded-2xl text-sm font-medium border border-slate-200 transition-all duration-200 inline-flex items-center justify-center gap-2;
+  }
+  .btn-secondary:hover {
+    @apply bg-slate-50 border-slate-300;
+  }
+  .card {
+    @apply bg-white rounded-3xl border border-slate-200;
+    box-shadow: 0 12px 30px -18px rgba(15, 23, 42, 0.28);
+  }
+  .badge-completed {
+    @apply bg-emerald-50 text-emerald-700 border border-emerald-200;
+  }
+  .badge-in-progress {
+    @apply bg-amber-50 text-amber-700 border border-amber-200;
+  }
+  .badge-planned {
+    @apply bg-slate-100 text-slate-600 border border-slate-200;
+  }
+  .tech-tag {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200;
+  }
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-xl border border-white/70 shadow-[0_25px_60px_-35px_rgba(15,23,42,0.35)];
+  }
+}
