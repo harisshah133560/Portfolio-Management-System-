@@ -226,6 +226,24 @@ exports.updateProject = async (req, res) => {
   }
 };
 
+// @desc    Delete all projects for the current user
+// @route   DELETE /api/projects/all
+exports.deleteAllProjects = async (req, res) => {
+  try {
+    const result = await Project.deleteMany({ user: req.user._id });
+
+    res.json({
+      success: true,
+      message: `Deleted ${result.deletedCount} project(s) successfully`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error deleting projects',
+    });
+  }
+};
+
 // @desc    Delete project
 // @route   DELETE /api/projects/:id
 exports.deleteProject = async (req, res) => {

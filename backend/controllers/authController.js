@@ -1,234 +1,203 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+const Project = require("../models/Project");
 
-const generateToken = function (id) {
-  return jwt.sign({ id: id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE || '7d',
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
+
+const generateToken = (user) => {
+  return jwt.sign({ id: user._id }, JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE || "7d",
   });
 };
 
 exports.register = async function (req, res) {
   try {
-    var name = req.body.name;
-    var email = req.body.email;
-    var password = req.body.password;
+    const { name, email, password } = req.body;
 
-    var existingUser = await User.findOne({ email: email });
-    if (existingUser) {
-      return res.status(409).json({
+    if (!name || !email || !password) {
+      return res.status(400).json({
         success: false,
-        message: 'An account with this email already exists',
+        message: "Name, email, and password are required",
       });
     }
 
-    var user = await User.create({ name: name, email: email, password: password });
-    var token = generateToken(user._id);
+    const normalizedEmail = String(email).toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "An account with that email already exists",
+      });
+    }
+
+    const user = await User.create({
+      name: String(name).trim(),
+      email: normalizedEmail,
+      password,
+    });
+
+    const token = generateToken(user);
 
     res.status(201).json({
       success: true,
       data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          avatar: user.avatar,
-          bio: user.bio,
-          location: user.location,
-          website: user.website,
-          headline: user.headline,
-          role: user.role,
-          githubUrl: user.githubUrl,
-          linkedinUrl: user.linkedinUrl,
-          emailAddress: user.emailAddress,
-          about: user.about,
-          createdAt: user.createdAt,
-        },
-        token: token,
+        user,
+        token,
       },
+      message: "Account created successfully",
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error during registration',
+      message: "Server error creating account",
     });
   }
 };
 
 exports.login = async function (req, res) {
   try {
-    var email = req.body.email;
-    var password = req.body.password;
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required',
+        message: "Email and password are required",
       });
     }
 
-    var user = await User.findOne({ email: email }).select('+password');
+    const user = await User.findOne({ email: String(email).toLowerCase() }).select("+password");
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'No account found with this email',
+        message: "Invalid email or password",
       });
     }
 
-    var isMatch = await user.comparePassword(password);
+    const isMatch = await user.comparePassword(password);
+
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Incorrect password',
+        message: "Invalid email or password",
       });
     }
 
-    var token = generateToken(user._id);
+    const token = generateToken(user);
 
-    res.json({
+    const safeUser = await User.findById(user._id).select("-password");
+
+    res.status(200).json({
       success: true,
       data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          avatar: user.avatar,
-          bio: user.bio,
-          location: user.location,
-          website: user.website,
-          headline: user.headline,
-          role: user.role,
-          githubUrl: user.githubUrl,
-          linkedinUrl: user.linkedinUrl,
-          emailAddress: user.emailAddress,
-          about: user.about,
-          createdAt: user.createdAt,
-        },
-        token: token,
+        user: safeUser,
+        token,
       },
+      message: "Login successful",
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error during login',
+      message: "Server error during login",
     });
   }
 };
 
 exports.getMe = async function (req, res) {
   try {
-    var user = await User.findById(req.user._id);
-    res.json({
+    res.status(200).json({
       success: true,
-      data: user,
+      data: req.user,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error fetching profile',
-    });
-  }
-};
-
-exports.getPublicProfile = async function (req, res) {
-  try {
-    var user = await User.findOne({}).select('name headline role githubUrl linkedinUrl emailAddress about avatar bio location website cvUrl createdAt');
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'Profile not found',
-      });
-    }
-
-    res.json({
-      success: true,
-      data: user,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching public profile',
+      message: "Server error fetching profile",
     });
   }
 };
 
 exports.updateProfile = async function (req, res) {
   try {
-    var name = req.body.name;
-    var bio = req.body.bio;
-    var location = req.body.location;
-    var website = req.body.website;
-    var avatar = req.body.avatar;
-    var headline = req.body.headline;
-    var role = req.body.role;
-    var githubUrl = req.body.githubUrl;
-    var linkedinUrl = req.body.linkedinUrl;
-    var emailAddress = req.body.emailAddress;
-    var about = req.body.about;
-    var cvUrl = req.body.cvUrl;
+    const allowedFields = [
+      "name",
+      "bio",
+      "location",
+      "website",
+      "headline",
+      "role",
+      "githubUrl",
+      "linkedinUrl",
+      "emailAddress",
+      "about",
+      "cvUrl",
+      "avatar",
+    ];
 
-    var updateData = {};
-    if (name !== undefined) updateData.name = name;
-    if (bio !== undefined) updateData.bio = bio;
-    if (location !== undefined) updateData.location = location;
-    if (website !== undefined) updateData.website = website;
-    if (avatar !== undefined) updateData.avatar = avatar;
-    if (headline !== undefined) updateData.headline = headline;
-    if (role !== undefined) updateData.role = role;
-    if (githubUrl !== undefined) updateData.githubUrl = githubUrl;
-    if (linkedinUrl !== undefined) updateData.linkedinUrl = linkedinUrl;
-    if (emailAddress !== undefined) updateData.emailAddress = emailAddress;
-    if (about !== undefined) updateData.about = about;
-    if (cvUrl !== undefined) updateData.cvUrl = cvUrl;
+    const updateData = {};
 
-    var user = await User.findByIdAndUpdate(req.user._id, updateData, {
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
+    const user = await User.findByIdAndUpdate(req.user._id, updateData, {
       new: true,
       runValidators: true,
-    });
+    }).select("-password");
 
-    res.json({
+    res.status(200).json({
       success: true,
       data: user,
-      message: 'Profile updated successfully',
+      message: "Profile updated successfully",
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error updating profile',
+      message: "Server error updating profile",
     });
   }
 };
 
 exports.changePassword = async function (req, res) {
   try {
-    var currentPassword = req.body.currentPassword;
-    var newPassword = req.body.newPassword;
+    const { currentPassword, newPassword } = req.body;
 
-    var user = await User.findById(req.user._id).select('+password');
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Current and new password are required",
+      });
+    }
 
-    var isMatch = await user.comparePassword(currentPassword);
+    const user = await User.findById(req.user._id).select("+password");
+    const isMatch = await user.comparePassword(currentPassword);
+
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Current password is incorrect',
+        message: "Current password is incorrect",
       });
     }
 
     user.password = newPassword;
     await user.save();
 
-    var token = generateToken(user._id);
-
-    res.json({
+    res.status(200).json({
       success: true,
-      data: { token: token },
-      message: 'Password changed successfully',
+      message: "Password changed successfully",
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error changing password',
+      message: "Server error changing password",
     });
   }
 };
@@ -238,27 +207,27 @@ exports.uploadAvatar = async function (req, res) {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'Please upload an image file',
+        message: "No avatar file uploaded",
       });
     }
 
-    var avatarPath = '/uploads/' + req.file.filename;
-
-    var user = await User.findByIdAndUpdate(
+    const avatarUrl = `/uploads/${req.file.filename}`;
+    const user = await User.findByIdAndUpdate(
       req.user._id,
-      { avatar: avatarPath },
-      { new: true }
-    );
+      { avatar: avatarUrl },
+      { new: true, runValidators: true }
+    ).select("-password");
 
-    res.json({
+    res.status(200).json({
       success: true,
       data: { avatar: user.avatar },
-      message: 'Avatar uploaded successfully',
+      message: "Avatar uploaded successfully",
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error uploading avatar',
+      message: "Server error uploading avatar",
     });
   }
 };
@@ -268,45 +237,75 @@ exports.uploadCv = async function (req, res) {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'Please upload a PDF or document file',
+        message: "No CV file uploaded",
       });
     }
 
-    var cvPath = '/uploads/' + req.file.filename;
-
-    var user = await User.findByIdAndUpdate(
+    const cvUrl = `/uploads/${req.file.filename}`;
+    const user = await User.findByIdAndUpdate(
       req.user._id,
-      { cvUrl: cvPath },
-      { new: true }
-    );
+      { cvUrl },
+      { new: true, runValidators: true }
+    ).select("-password");
 
-    res.json({
+    res.status(200).json({
       success: true,
       data: { cvUrl: user.cvUrl },
-      message: 'CV uploaded successfully',
+      message: "CV uploaded successfully",
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error uploading CV',
+      message: "Server error uploading CV",
     });
   }
 };
 
 exports.deleteAccount = async function (req, res) {
   try {
-    var Project = require('../models/Project');
-    await Project.deleteMany({ user: req.user._id });
-    await User.findByIdAndDelete(req.user._id);
+    await Promise.all([
+      User.findByIdAndDelete(req.user._id),
+      Project.deleteMany({ user: req.user._id }),
+    ]);
 
-    res.json({
+    res.status(200).json({
       success: true,
-      message: 'Account and all associated data deleted successfully',
+      message: "Account deleted successfully",
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Server error deleting account',
+      message: "Server error deleting account",
+    });
+  }
+};
+
+exports.getPublicProfile = async function (req, res) {
+  try {
+    const userId = req.params.userId || req.query.userId;
+    const user = userId
+      ? await User.findById(userId)
+      : await User.findOne({}).sort({ createdAt: -1 });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error fetching public profile",
     });
   }
 };

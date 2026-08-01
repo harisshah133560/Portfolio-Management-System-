@@ -1,138 +1,64 @@
-# Portfolio Management System
+# PortfolioHub
 
-A full-stack Portfolio Management System built using the MERN Stack (MongoDB, Express.js, React.js, and Node.js). The application allows users to create, manage, and showcase their portfolio projects through a modern and responsive interface.
-
----
+A full-stack portfolio management system built with the MERN stack.
 
 ## Features
 
-- User Registration and Login
-- Secure JWT Authentication
-- Create, Update and Delete Portfolio Projects
-- Upload Project Images and Files
-- Public Portfolio Page
-- Dashboard for Managing Projects
-- Responsive User Interface
-- RESTful API Architecture
+- User registration and login
+- JWT authentication
+- Project CRUD
+- Public portfolio view
+- Responsive UI
 
----
-
-## Tech Stack
-
-### Frontend
-- React.js
-- Vite
-- Tailwind CSS
-- Axios
+## Local development
 
 ### Backend
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT Authentication
-- Multer (File Upload)
-
----
-
-## Project Structure
-
-```
-PortfolioHub-main/
-│
-├── backend/
-│   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── uploads/
-│   └── server.js
-│
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.js
-│
-└── README.md
-```
-
----
-
-## Installation
-
-### Clone the Repository
-
-```bash
-git clone https://github.com/harisshah133560/Portfolio-Management-System-.git
-```
-
-### Backend Setup
 
 ```bash
 cd backend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-### Frontend Setup
+### Frontend
 
 ```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
----
+## Production deployment
 
-## Environment Variables
+### Frontend on Vercel
 
-Create a `.env` file inside the backend folder.
+1. Set the build command to `npm run build`.
+2. Set the output directory to `dist`.
+3. Add this environment variable:
+   - `VITE_API_BASE_URL=https://your-backend-url.onrender.com/api`
 
-Example:
+### Backend on Render
 
-```env
-PORT=5000
-MONGO_URI=YOUR_MONGODB_CONNECTION_STRING
-JWT_SECRET=YOUR_SECRET_KEY
-```
+1. Create a web service from the backend folder.
+2. Set the start command to `npm start`.
+3. Add these environment variables:
+   - `NODE_ENV=production`
+   - `MONGO_URI=your_mongodb_connection_string`
+   - `JWT_SECRET=your_secret`
+   - `CLIENT_URL=https://your-frontend-domain.vercel.app`
+   - `FRONTEND_URL=https://your-frontend-domain.vercel.app`
+   - `ALLOWED_ORIGINS=https://your-frontend-domain.vercel.app`
 
----
+### Notes
 
-## Screenshots
-
-You can add screenshots of the application here.
-
-Example:
-
-- Login Page
-- Dashboard
-- Portfolio Page
-- Project Management
-
----
-
-## Future Improvements
-
-- Email Verification
-- Password Reset
-- Search and Filter Projects
-- Project Categories
-- Deployment on Cloud
-- Admin Dashboard
-
----
+- The frontend uses Vite and is configured for a production build with a Vercel-friendly rewrite rule.
+- The backend is configured to serve uploads from the `uploads` folder and to accept cross-origin requests from the frontend domain.
+- For persistent file uploads in production, consider storing uploads in cloud storage rather than the local filesystem.
 
 ## Author
 
 **Haris Shah**
 
 - GitHub: https://github.com/harisshah133560
-- LinkedIn: *(Add your LinkedIn profile here)*
-
----
-
-## License
-
-This project is developed for educational and portfolio purposes.

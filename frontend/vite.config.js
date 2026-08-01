@@ -1,5 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+const apiTarget = process.env.VITE_API_TARGET || 'http://localhost:5000';
 
 export default defineConfig({
   plugins: [react()],
@@ -7,13 +9,17 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
+        target: apiTarget,
+        changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
-      }
-    }
-  }
-})
+        target: apiTarget,
+        changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+  },
+});
