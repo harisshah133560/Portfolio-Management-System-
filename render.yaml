@@ -1,23 +1,58 @@
 services:
+  # Backend Web Service
   - type: web
-    name: portfoliohub-backend
+    name: portfolio-management-system
     env: node
-    repo: .
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
+
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
-      - key: MONGO_URI
+
+      - key: MONGODB_URI
         sync: false
+
       - key: JWT_SECRET
         sync: false
+
+      - key: JWT_EXPIRE
+        value: 7d
+
       - key: CLIENT_URL
-        value: https://your-frontend-domain.vercel.app
-      - key: FRONTEND_URL
-        value: https://your-frontend-domain.vercel.app
-      - key: ALLOWED_ORIGINS
-        value: https://your-frontend-domain.vercel.app
+        value: https://portfolio-management-system-frontend.onrender.com
+
+      - key: COOKIE_HTTP_ONLY
+        value: "true"
+
+      - key: COOKIE_SECURE
+        value: "true"
+
+      - key: COOKIE_SAME_SITE
+        value: None
+
+      - key: COOKIE_MAX_AGE
+        value: "604800000"
+
+      - key: UPLOAD_DIR
+        value: ./uploads
+
+      - key: MAX_FILE_SIZE
+        value: "5242880"
+
+  # Frontend Static Site
+  - type: static
+    name: portfolio-management-system-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://portfolio-management-system-rcg8.onrender.com/api
+
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
