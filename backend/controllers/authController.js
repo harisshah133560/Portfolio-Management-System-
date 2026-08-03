@@ -4,6 +4,29 @@ const Project = require("../models/Project");
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
 
+const normalizeAssetUrl = (value) => {
+  if (!value || typeof value !== "string") return value;
+
+  const trimmedValue = value.trim();
+  if (!trimmedValue) return "";
+
+  if (/^https?:\/\//i.test(trimmedValue)) {
+    try {
+      const parsedUrl = new URL(trimmedValue);
+      const normalizedPath = parsedUrl.pathname.replace(/^\/api/, "");
+      return normalizedPath.startsWith("/uploads") ? normalizedPath : trimmedValue;
+    } catch (error) {
+      return trimmedValue;
+    }
+  }
+
+  if (trimmedValue.startsWith("uploads/")) {
+    return `/${trimmedValue}`;
+  }
+
+  return trimmedValue;
+};
+
 const generateToken = (user) => {
   return jwt.sign({ id: user._id }, JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || "7d",
@@ -142,7 +165,9 @@ exports.updateProfile = async function (req, res) {
 
     allowedFields.forEach((field) => {
       if (req.body[field] !== undefined) {
-        updateData[field] = req.body[field];
+        updateData[field] = field === "avatar" || field === "cvUrl"
+          ? normalizeAssetUrl(req.body[field])
+          : req.body[field];
       }
     });
 

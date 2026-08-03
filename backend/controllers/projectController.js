@@ -1,5 +1,28 @@
 const Project = require('../models/Project');
 
+const normalizeAssetUrl = (value) => {
+  if (!value || typeof value !== 'string') return value;
+
+  const trimmedValue = value.trim();
+  if (!trimmedValue) return '';
+
+  if (/^https?:\/\//i.test(trimmedValue)) {
+    try {
+      const parsedUrl = new URL(trimmedValue);
+      const normalizedPath = parsedUrl.pathname.replace(/^\/api/, '');
+      return normalizedPath.startsWith('/uploads') ? normalizedPath : trimmedValue;
+    } catch (error) {
+      return trimmedValue;
+    }
+  }
+
+  if (trimmedValue.startsWith('uploads/')) {
+    return `/${trimmedValue}`;
+  }
+
+  return trimmedValue;
+};
+
 // @desc    Get public projects for portfolio visitors
 // @route   GET /api/projects/public
 exports.getPublicProjects = async (req, res) => {
@@ -149,8 +172,8 @@ exports.createProject = async (req, res) => {
     let imageUrl = null;
     if (req.file) {
       imageUrl = `/uploads/${req.file.filename}`;
-    } else if (req.body.imageUrl) {
-      imageUrl = req.body.imageUrl;
+    } else if (req.body.imageUrl !== undefined) {
+      imageUrl = normalizeAssetUrl(req.body.imageUrl);
     }
 
     const project = await Project.create({
@@ -200,10 +223,12 @@ exports.updateProject = async (req, res) => {
     // Handle uploaded image
     if (req.file) {
       updateData.imageUrl = `/uploads/${req.file.filename}`;
+    } else if (req.body.imageUrl !== undefined) {
+      updateData.imageUrl = normalizeAssetUrl(req.body.imageUrl);
     }
 
     // Remove imageUrl from body if no file and no explicit imageUrl
-    if (!req.file && !req.body.imageUrl) {
+    if (!req.file && req.body.imageUrl === undefined) {
       delete updateData.imageUrl;
     }
 

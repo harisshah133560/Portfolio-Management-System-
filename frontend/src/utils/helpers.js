@@ -60,15 +60,34 @@ export function getAssetUrl(value, fallback = null) {
   var trimmedValue = value.trim();
   if (!trimmedValue) return fallback;
 
-  if (/^https?:\/\//i.test(trimmedValue) || trimmedValue.startsWith('data:image/')) {
-    return trimmedValue;
-  }
-
   var apiBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '/api';
   var backendBaseUrl = apiBaseUrl.replace(/\/api\/?$/, '');
 
+  if (trimmedValue.startsWith('data:image/')) {
+    return trimmedValue;
+  }
+
+  if (/^https?:\/\//i.test(trimmedValue)) {
+    try {
+      var parsedUrl = new URL(trimmedValue);
+      var normalizedPath = parsedUrl.pathname.replace(/^\/api/, '');
+
+      if (normalizedPath.startsWith('/uploads')) {
+        return backendBaseUrl ? backendBaseUrl + normalizedPath : normalizedPath;
+      }
+
+      return trimmedValue;
+    } catch (error) {
+      return trimmedValue;
+    }
+  }
+
   if (trimmedValue.startsWith('/')) {
     return backendBaseUrl ? backendBaseUrl + trimmedValue : trimmedValue;
+  }
+
+  if (trimmedValue.startsWith('uploads/')) {
+    return backendBaseUrl ? backendBaseUrl + '/' + trimmedValue : '/' + trimmedValue;
   }
 
   return trimmedValue;

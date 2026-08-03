@@ -92,6 +92,20 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // ===============================
 // Static Uploads
 // ===============================
+app.use("/uploads", (req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
+
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.get("/uploads/:file", (req, res) => {
   res.sendFile(path.join(process.cwd(), "uploads", req.params.file));
