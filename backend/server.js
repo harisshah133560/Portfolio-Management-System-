@@ -107,8 +107,18 @@ app.use("/uploads", (req, res, next) => {
 });
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 app.get("/uploads/:file", (req, res) => {
-  res.sendFile(path.join(process.cwd(), "uploads", req.params.file));
+  const uploadPath = path.join(process.cwd(), "uploads", req.params.file);
+  res.sendFile(uploadPath, (error) => {
+    if (error) {
+      res.status(404).json({ success: false, message: "File not found" });
+    }
+  });
+});
+
+app.get("/uploads", (req, res) => {
+  res.status(404).json({ success: false, message: "Upload directory not found" });
 });
 
 // ===============================
