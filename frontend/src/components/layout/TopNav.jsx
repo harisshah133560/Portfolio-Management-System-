@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Menu, PanelLeftOpen, PanelLeftClose, Search, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { getAssetUrl } from '../../utils/helpers';
 
 var PAGE_NAMES = {
   '/': 'Dashboard',
@@ -18,7 +19,7 @@ export default function TopNav(props) {
   var user = useAuth().user;
   var navigate = useNavigate();
   var pageName = PAGE_NAMES[pathname] || (pathname && pathname.includes('/edit') ? 'Edit Project' : 'Dashboard');
-  var avatarUrl = user && user.avatar ? user.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((user && user.name) || 'U') + '&background=2563EB&color=fff&size=80&bold=true';
+  var avatarUrl = getAssetUrl(user && user.avatar ? user.avatar : null, 'https://ui-avatars.com/api/?name=' + encodeURIComponent((user && user.name) || 'U') + '&background=2563EB&color=fff&size=80&bold=true');
 
   var handleQuickSearch = function (e) {
     if (e.key === 'Enter') {

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Pencil, Trash2, ExternalLink, Github } from 'lucide-react';
 import StatusBadge from '../components/common/StatusBadge';
 import TechTags from '../components/common/TechTags';
-import { getCategoryLabel, getCategoryColor, formatRelative } from '../utils/helpers';
+import { getAssetUrl, getCategoryLabel, getCategoryColor, formatRelative } from '../utils/helpers';
 
 export default function ProjectCard(props) {
   var project = props.project;
@@ -22,7 +22,7 @@ export default function ProjectCard(props) {
     >
       <div className="relative h-52 bg-slate-100 overflow-hidden group">
         <img
-          src={project.imageUrl || 'https://picsum.photos/seed/' + project._id + '/600/400'}
+          src={getAssetUrl(project.imageUrl, 'https://picsum.photos/seed/' + project._id + '/600/400')}
           alt={project.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"

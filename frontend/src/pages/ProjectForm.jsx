@@ -5,7 +5,7 @@ import { ArrowLeft, Type, Layers, Code2, UploadCloud, PlusCircle } from 'lucide-
 import { useToast } from '../context/ToastContext';
 import { projectApi } from '../api/projectApi';
 import { CATEGORIES, STATUSES } from '../utils/constants';
-import { compressImage } from '../utils/helpers';
+import { compressImage, getAssetUrl } from '../utils/helpers';
 
 export default function ProjectForm() {
   var params = useParams();
@@ -72,7 +72,7 @@ export default function ProjectForm() {
             imageUrl: p.imageUrl || '',
           });
           setTechs(p.technologies || []);
-          if (p.imageUrl) setImagePreview(p.imageUrl);
+          if (p.imageUrl) setImagePreview(getAssetUrl(p.imageUrl));
         }
       })
       .catch(function () {
@@ -272,7 +272,7 @@ export default function ProjectForm() {
             className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center cursor-pointer transition-all hover:border-blue-300 hover:bg-blue-50/50"
           >
             {imagePreview ? (
-              <img src={imagePreview} alt="Preview" className="max-h-64 mx-auto rounded-lg mb-4 object-cover" />
+              <img src={getAssetUrl(imagePreview)} alt="Preview" className="max-h-64 mx-auto rounded-lg mb-4 object-cover" />
             ) : (
               <div>
                 <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4"><UploadCloud className="w-8 h-8 text-slate-300" /></div>

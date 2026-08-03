@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { authApi } from '../api/authApi';
-import { compressImage } from '../utils/helpers';
+import { compressImage, getAssetUrl } from '../utils/helpers';
 
 export default function Profile() {
   var auth = useAuth();
@@ -50,7 +50,7 @@ export default function Profile() {
   var pwLabelState = useState('');
   var pwLabel = pwLabelState[0]; var setPwLabel = pwLabelState[1];
 
-  var avatarUrl = user && user.avatar ? user.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent((user && user.name) || 'U') + '&background=2563EB&color=fff&size=200&bold=true';
+  var avatarUrl = getAssetUrl(user && user.avatar ? user.avatar : null, 'https://ui-avatars.com/api/?name=' + encodeURIComponent((user && user.name) || 'U') + '&background=2563EB&color=fff&size=200&bold=true');
 
   var handleAvatarUpload = function (e) {
     var file = e.target.files[0];

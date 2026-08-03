@@ -92,7 +92,10 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // ===============================
 // Static Uploads
 // ===============================
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.get("/uploads/:file", (req, res) => {
+  res.sendFile(path.join(process.cwd(), "uploads", req.params.file));
+});
 
 // ===============================
 // Routes

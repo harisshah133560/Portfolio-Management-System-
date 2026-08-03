@@ -251,7 +251,7 @@ export default function Dashboard() {
                     <tr key={p._id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-3">
-                          <img src={p.imageUrl || 'https://picsum.photos/seed/' + p._id + '/80/80'} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                          <img src={getAssetUrl(p.imageUrl, 'https://picsum.photos/seed/' + p._id + '/80/80')} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                           <div className="min-w-0">
                             <p className="font-semibold text-slate-800 truncate max-w-[200px]">{p.title}</p>
                             <p className="text-xs text-slate-400 truncate max-w-[200px]">{p.description ? p.description.substring(0, 40) + '...' : ''}</p>

@@ -5,6 +5,7 @@ import { authApi } from '../api/authApi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { getAssetUrl } from '../utils/helpers';
 
 export default function PublicPortfolio() {
   const [projects, setProjects] = useState([]);
@@ -33,7 +34,7 @@ export default function PublicPortfolio() {
   var profileEmail = profile && profile.emailAddress ? profile.emailAddress : 'haris@example.com';
   var profileGithub = profile && profile.githubUrl ? profile.githubUrl : 'https://github.com/harisshah133560';
   var profileLinkedin = profile && profile.linkedinUrl ? profile.linkedinUrl : 'https://www.linkedin.com/in/harisshah-/';
-  var profileAvatar = profile && profile.avatar ? profile.avatar : null;
+  var profileAvatar = profile && profile.avatar ? getAssetUrl(profile.avatar) : null;
   var profileCv = profile && profile.cvUrl ? profile.cvUrl : null;
   var skills = ['React', 'Node.js', 'MongoDB', 'Tailwind CSS', 'Express', 'REST APIs'];
   var profileInitials = profileName
@@ -184,7 +185,7 @@ export default function PublicPortfolio() {
                 return (
                   <motion.article key={project._id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} className={"card overflow-hidden " + (theme === 'dark' ? 'bg-slate-900 border-slate-800' : '')}>
                     <div className="h-44 bg-slate-100">
-                      <img src={project.imageUrl || 'https://picsum.photos/seed/' + project._id + '/600/400'} alt={project.title} className="h-full w-full object-cover" />
+                      <img src={getAssetUrl(project.imageUrl, 'https://picsum.photos/seed/' + project._id + '/600/400')} alt={project.title} className="h-full w-full object-cover" />
                     </div>
                     <div className="p-5">
                       <div className={"flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] " + (theme === 'dark' ? 'text-slate-400' : 'text-slate-400')}>
