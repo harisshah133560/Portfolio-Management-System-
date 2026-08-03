@@ -198,10 +198,19 @@ export default function PublicPortfolio() {
                           return <span key={tech} className={"tech-tag " + (theme === 'dark' ? 'bg-slate-800 text-slate-200 border-slate-700' : '')}>{tech}</span>;
                         })}
                       </div>
-                      {project.githubUrl && (
-                        <a href={project.githubUrl} target="_blank" rel="noreferrer" className={"mt-5 inline-flex items-center gap-2 text-sm font-semibold " + (theme === 'dark' ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-800')}>
-                          <Github className="w-4 h-4" /> View on GitHub
-                        </a>
+                      {(project.liveUrl || project.githubUrl) && (
+                        <div className="mt-5 flex flex-wrap gap-3">
+                          {project.liveUrl && (
+                            <a href={project.liveUrl} target="_blank" rel="noreferrer" className={"inline-flex items-center gap-2 text-sm font-semibold " + (theme === 'dark' ? 'text-emerald-400 hover:text-emerald-300' : 'text-emerald-700 hover:text-emerald-800')}>
+                              <Globe2 className="w-4 h-4" /> Live Demo
+                            </a>
+                          )}
+                          {project.githubUrl && (
+                            <a href={project.githubUrl} target="_blank" rel="noreferrer" className={"inline-flex items-center gap-2 text-sm font-semibold " + (theme === 'dark' ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-800')}>
+                              <Github className="w-4 h-4" /> View on GitHub
+                            </a>
+                          )}
+                        </div>
                       )}
                     </div>
                   </motion.article>
