@@ -35,7 +35,7 @@ export default function PublicPortfolio() {
   var profileGithub = profile && profile.githubUrl ? profile.githubUrl : 'https://github.com/harisshah133560';
   var profileLinkedin = profile && profile.linkedinUrl ? profile.linkedinUrl : 'https://www.linkedin.com/in/harisshah-/';
   var profileAvatar = profile && profile.avatar ? getAssetUrl(profile.avatar) : null;
-  var profileCv = profile && profile.cvUrl ? profile.cvUrl : null;
+  var profileCv = profile && profile.cvUrl ? getAssetUrl(profile.cvUrl) : null;
   var skills = ['React', 'Node.js', 'MongoDB', 'Tailwind CSS', 'Express', 'REST APIs'];
   var profileInitials = profileName
     .split(' ')

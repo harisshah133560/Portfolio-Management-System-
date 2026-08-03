@@ -34,6 +34,7 @@ export default function Profile() {
   var about = aboutState[0]; var setAbout = aboutState[1];
   var cvUrlState = useState(user ? user.cvUrl || '' : '');
   var cvUrl = cvUrlState[0]; var setCvUrl = cvUrlState[1];
+  var resolvedCvUrl = getAssetUrl(cvUrl);
 
   var currentPwState = useState('');
   var currentPw = currentPwState[0]; var setCurrentPw = currentPwState[1];
@@ -242,8 +243,8 @@ export default function Profile() {
               <input type="file" accept=".pdf,.doc,.docx" onChange={handleCvUpload} className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
               <p className="text-xs text-slate-400 mt-2">Supported formats: PDF, DOC, DOCX</p>
             </div>
-            {cvUrl ? (
-              <a href={cvUrl} target="_blank" rel="noreferrer" className="inline-flex items-center text-sm font-semibold text-blue-700 hover:text-blue-800">
+            {resolvedCvUrl ? (
+              <a href={resolvedCvUrl} target="_blank" rel="noreferrer" className="inline-flex items-center text-sm font-semibold text-blue-700 hover:text-blue-800">
                 View uploaded CV
               </a>
             ) : (
