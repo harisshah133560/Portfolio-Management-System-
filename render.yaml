@@ -20,8 +20,15 @@ services:
       - key: JWT_EXPIRE
         value: 7d
 
+      # IMPORTANT: set this in the Render dashboard to whichever URL your
+      # frontend is actually served from. The README's instructions deploy
+      # the frontend to Vercel, which is a DIFFERENT URL than the Render
+      # static site defined below. If this doesn't match your real frontend
+      # origin exactly, the backend's CORS check will reject every request
+      # from it. Only use the onrender.com static-site URL below if you are
+      # deploying the frontend via this file instead of via Vercel.
       - key: CLIENT_URL
-        value: https://portfolio-management-system-frontend.onrender.com
+        sync: false
 
       - key: COOKIE_HTTP_ONLY
         value: "true"

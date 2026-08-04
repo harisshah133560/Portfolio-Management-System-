@@ -25,7 +25,7 @@ const normalizeAssetUrl = (value) => {
 
 // @desc    Get public projects for portfolio visitors
 // @route   GET /api/projects/public
-exports.getPublicProjects = async (req, res) => {
+exports.getPublicProjects = async (req, res, next) => {
   try {
     let projects = await Project.find({ featured: true }).sort({ createdAt: -1 }).limit(6).lean();
 
@@ -35,13 +35,13 @@ exports.getPublicProjects = async (req, res) => {
 
     res.json({ success: true, data: projects });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error fetching public projects' });
+    next(error);
   }
 };
 
 // @desc    Get all projects for logged-in user (with filters, search, sort, pagination)
 // @route   GET /api/projects
-exports.getProjects = async (req, res) => {
+exports.getProjects = async (req, res, next) => {
   try {
     const userId = req.user ? req.user._id : null;
     if (!userId) {
@@ -122,16 +122,13 @@ exports.getProjects = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching projects',
-    });
+    next(error);
   }
 };
 
 // @desc    Get single project
 // @route   GET /api/projects/:id
-exports.getProject = async (req, res) => {
+exports.getProject = async (req, res, next) => {
   try {
     const userId = req.user ? req.user._id : null;
     if (!userId) {
@@ -155,16 +152,13 @@ exports.getProject = async (req, res) => {
       data: project,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching project',
-    });
+    next(error);
   }
 };
 
 // @desc    Create project
 // @route   POST /api/projects
-exports.createProject = async (req, res) => {
+exports.createProject = async (req, res, next) => {
   try {
     const { title, description, technologies, category, status, githubUrl, liveUrl, featured } = req.body;
 
@@ -195,16 +189,13 @@ exports.createProject = async (req, res) => {
       message: 'Project created successfully',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error creating project',
-    });
+    next(error);
   }
 };
 
 // @desc    Update project
 // @route   PUT /api/projects/:id
-exports.updateProject = async (req, res) => {
+exports.updateProject = async (req, res, next) => {
   try {
     let project = await Project.findOne({
       _id: req.params.id,
@@ -244,16 +235,13 @@ exports.updateProject = async (req, res) => {
       message: 'Project updated successfully',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error updating project',
-    });
+    next(error);
   }
 };
 
 // @desc    Delete all projects for the current user
 // @route   DELETE /api/projects/all
-exports.deleteAllProjects = async (req, res) => {
+exports.deleteAllProjects = async (req, res, next) => {
   try {
     const result = await Project.deleteMany({ user: req.user._id });
 
@@ -262,16 +250,13 @@ exports.deleteAllProjects = async (req, res) => {
       message: `Deleted ${result.deletedCount} project(s) successfully`,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error deleting projects',
-    });
+    next(error);
   }
 };
 
 // @desc    Delete project
 // @route   DELETE /api/projects/:id
-exports.deleteProject = async (req, res) => {
+exports.deleteProject = async (req, res, next) => {
   try {
     const project = await Project.findOne({
       _id: req.params.id,
@@ -292,16 +277,13 @@ exports.deleteProject = async (req, res) => {
       message: 'Project deleted successfully',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error deleting project',
-    });
+    next(error);
   }
 };
 
 // @desc    Get dashboard stats
 // @route   GET /api/projects/stats
-exports.getStats = async (req, res) => {
+exports.getStats = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
@@ -355,26 +337,6 @@ exports.getStats = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error fetching stats',
-    });
-  }
-};
-
-// @desc    Delete all user projects
-// @route   DELETE /api/projects/all
-exports.deleteAllProjects = async (req, res) => {
-  try {
-    const result = await Project.deleteMany({ user: req.user._id });
-    res.json({
-      success: true,
-      message: `${result.deletedCount} projects deleted successfully`,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error deleting projects',
-    });
+    next(error);
   }
 };

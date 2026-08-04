@@ -33,7 +33,7 @@ const generateToken = (user) => {
   });
 };
 
-exports.register = async function (req, res) {
+exports.register = async function (req, res, next) {
   try {
     const { name, email, password } = req.body;
 
@@ -71,15 +71,11 @@ exports.register = async function (req, res) {
       message: "Account created successfully",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error creating account",
-    });
+    next(error);
   }
 };
 
-exports.login = async function (req, res) {
+exports.login = async function (req, res, next) {
   try {
     const { email, password } = req.body;
 
@@ -121,30 +117,22 @@ exports.login = async function (req, res) {
       message: "Login successful",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error during login",
-    });
+    next(error);
   }
 };
 
-exports.getMe = async function (req, res) {
+exports.getMe = async function (req, res, next) {
   try {
     res.status(200).json({
       success: true,
       data: req.user,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error fetching profile",
-    });
+    next(error);
   }
 };
 
-exports.updateProfile = async function (req, res) {
+exports.updateProfile = async function (req, res, next) {
   try {
     const allowedFields = [
       "name",
@@ -182,15 +170,11 @@ exports.updateProfile = async function (req, res) {
       message: "Profile updated successfully",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error updating profile",
-    });
+    next(error);
   }
 };
 
-exports.changePassword = async function (req, res) {
+exports.changePassword = async function (req, res, next) {
   try {
     const { currentPassword, newPassword } = req.body;
 
@@ -219,15 +203,11 @@ exports.changePassword = async function (req, res) {
       message: "Password changed successfully",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error changing password",
-    });
+    next(error);
   }
 };
 
-exports.uploadAvatar = async function (req, res) {
+exports.uploadAvatar = async function (req, res, next) {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -249,15 +229,11 @@ exports.uploadAvatar = async function (req, res) {
       message: "Avatar uploaded successfully",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error uploading avatar",
-    });
+    next(error);
   }
 };
 
-exports.uploadCv = async function (req, res) {
+exports.uploadCv = async function (req, res, next) {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -279,15 +255,11 @@ exports.uploadCv = async function (req, res) {
       message: "CV uploaded successfully",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error uploading CV",
-    });
+    next(error);
   }
 };
 
-exports.deleteAccount = async function (req, res) {
+exports.deleteAccount = async function (req, res, next) {
   try {
     await Promise.all([
       User.findByIdAndDelete(req.user._id),
@@ -299,15 +271,11 @@ exports.deleteAccount = async function (req, res) {
       message: "Account deleted successfully",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error deleting account",
-    });
+    next(error);
   }
 };
 
-exports.getPublicProfile = async function (req, res) {
+exports.getPublicProfile = async function (req, res, next) {
   try {
     const userId = req.params.userId || req.query.userId;
     const user = userId
@@ -326,11 +294,6 @@ exports.getPublicProfile = async function (req, res) {
       data: user,
     });
   } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Server error fetching public profile",
-    });
+    next(error);
   }
 };

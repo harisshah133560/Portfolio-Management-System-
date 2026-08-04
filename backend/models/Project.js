@@ -19,8 +19,18 @@ const projectSchema = new mongoose.Schema(
     technologies: {
       type: [String],
       default: [],
-      set: (arr) =>
-        arr.map((tech) => tech.trim()).filter((tech) => tech.length > 0),
+      set: (value) => {
+        // multipart/form-data (multer) only turns a repeated field into an
+        // array when it appears 2+ times; a single tag arrives as a plain
+        // string, and undefined/null can also reach here. Normalize first.
+        const arr = Array.isArray(value)
+          ? value
+          : value === undefined || value === null || value === ""
+          ? []
+          : [value];
+
+        return arr.map((tech) => String(tech).trim()).filter((tech) => tech.length > 0);
+      },
       validate: {
         validator: function (arr) {
           return arr.length <= 15;
