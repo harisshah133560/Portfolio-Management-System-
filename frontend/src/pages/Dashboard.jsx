@@ -21,8 +21,7 @@ import StatusBadge from '../components/common/StatusBadge';
 import { SkeletonCard, SkeletonTable } from '../components/common/SkeletonLoader';
 import Modal from '../components/common/Modal';
 import { CATEGORIES } from '../utils/constants';
-import { formatRelative, getGreeting, getCategoryLabel, getCategoryColor } from '../utils/helpers';
-
+import { formatRelative, getGreeting, getCategoryLabel, getCategoryColor, getAssetUrl } from '../utils/helpers';
 ChartJS.register(
   ArcElement,
   Tooltip,
