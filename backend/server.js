@@ -124,6 +124,14 @@ app.get("/uploads", (req, res) => {
 // ===============================
 // Routes
 // ===============================
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Portfolio Management System API is running.",
+    environment: process.env.NODE_ENV || "development",
+  });
+});
+
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/projects", require("./routes/projects"));
 
