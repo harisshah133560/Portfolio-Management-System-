@@ -52,6 +52,7 @@ export default function ProjectForm() {
     githubUrl: '',
     liveUrl: '',
     imageUrl: '',
+    featured: false,
   });
   var form = formState[0];
   var setForm = formState[1];
@@ -70,6 +71,7 @@ export default function ProjectForm() {
             githubUrl: p.githubUrl || '',
             liveUrl: p.liveUrl || '',
             imageUrl: p.imageUrl || '',
+            featured: Boolean(p.featured),
           });
           setTechs(p.technologies || []);
           if (p.imageUrl) setImagePreview(getAssetUrl(p.imageUrl));
@@ -84,7 +86,8 @@ export default function ProjectForm() {
 
   var handleChange = function (e) {
     var updated = Object.assign({}, form);
-    updated[e.target.name] = e.target.value;
+    var val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    updated[e.target.name] = val;
     setForm(updated);
     if (errors[e.target.name]) {
       var errUpdated = Object.assign({}, errors);
@@ -139,7 +142,13 @@ export default function ProjectForm() {
     formData.append('status', form.status);
     formData.append('githubUrl', form.githubUrl);
     formData.append('liveUrl', form.liveUrl);
-    techs.forEach(function (t) { formData.append('technologies', t); });
+    formData.append('featured', form.featured ? 'true' : 'false');
+
+    if (techs.length === 0) {
+      formData.append('technologies', '');
+    } else {
+      techs.forEach(function (t) { formData.append('technologies', t); });
+    }
 
     if (imageFile) {
       formData.append('image', imageFile);
@@ -151,6 +160,8 @@ export default function ProjectForm() {
       for (var i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); }
       var blob = new Blob([ab], { type: mimeString });
       formData.append('image', blob, 'image.jpg');
+    } else {
+      formData.append('imageUrl', form.imageUrl || '');
     }
 
     var apiCall = isEdit ? projectApi.updateProject(id, formData) : projectApi.createProject(formData);
@@ -228,6 +239,23 @@ export default function ProjectForm() {
               <select name="status" value={form.status} onChange={handleChange} className="input-field cursor-pointer">
                 {STATUSES.map(function (s) { return <option key={s.value} value={s.value}>{s.label}</option>; })}
               </select>
+            </div>
+            <div className="md:col-span-2 pt-2 border-t border-slate-100">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  name="featured"
+                  checked={form.featured}
+                  onChange={handleChange}
+                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
+                />
+                <span className="text-sm font-semibold text-slate-700">
+                  Feature this project on the public portfolio
+                </span>
+              </label>
+              <p className="text-xs text-slate-400 mt-1 pl-7">
+                Featured projects appear prominently in the Featured Work section of your public portfolio showcase.
+              </p>
             </div>
           </div>
         </motion.div>

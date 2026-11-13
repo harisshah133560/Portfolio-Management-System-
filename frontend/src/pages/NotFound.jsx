@@ -13,7 +13,7 @@ export default function NotFound() {
         <p className="text-slate-500 mb-8">The page you're looking for doesn't exist or has been moved.</p>
         <div className="flex items-center justify-center gap-3">
           <button onClick={function () { window.history.back(); }} className="btn-secondary"><ArrowLeft className="w-4 h-4" />Go Back</button>
-          <Link to="/" className="btn-primary"><Home className="w-4 h-4" />Dashboard</Link>
+          <Link to="/" className="btn-primary"><Home className="w-4 h-4" />Home</Link>
         </div>
       </motion.div>
     </div>

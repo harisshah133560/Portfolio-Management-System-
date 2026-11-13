@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, SearchX } from 'lucide-react';
@@ -31,11 +31,24 @@ export default function ProjectList() {
   var updateFilters = projectHook.updateFilters;
   var goToPage = projectHook.goToPage;
   var resetFilters = projectHook.resetFilters;
+  var refetch = projectHook.refetch;
+
+  useEffect(function () {
+    var searchParam = searchParams.get('search') || '';
+    var categoryParam = searchParams.get('category') || '';
+    if (searchParam !== filters.search || categoryParam !== filters.category) {
+      updateFilters({ search: searchParam, category: categoryParam });
+    }
+  }, [searchParams]);
 
   var handleDelete = function () {
     if (!deleteId) return;
     projectApi.deleteProject(deleteId)
-      .then(function () { toast.success('Project deleted successfully'); setDeleteId(null); })
+      .then(function () {
+        toast.success('Project deleted successfully');
+        setDeleteId(null);
+        if (refetch) refetch();
+      })
       .catch(function (err) { toast.error(err.message || 'Delete failed'); });
   };
 

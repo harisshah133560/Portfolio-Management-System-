@@ -1,4 +1,5 @@
 const Project = require('../models/Project');
+const User = require('../models/User');
 
 const normalizeAssetUrl = (value) => {
   if (!value || typeof value !== 'string') return value;
@@ -27,10 +28,27 @@ const normalizeAssetUrl = (value) => {
 // @route   GET /api/projects/public
 exports.getPublicProjects = async (req, res, next) => {
   try {
-    let projects = await Project.find({ featured: true }).sort({ createdAt: -1 }).limit(6).lean();
+    let userFilter = {};
+    const userId = req.params.userId || req.query.userId;
+    if (userId) {
+      userFilter = { user: userId };
+    } else {
+      const publicUser = await User.findOne({}).sort({ createdAt: -1 });
+      if (publicUser) {
+        userFilter = { user: publicUser._id };
+      }
+    }
+
+    let projects = await Project.find({ ...userFilter, featured: true })
+      .sort({ createdAt: -1 })
+      .limit(12)
+      .lean();
 
     if (!projects.length) {
-      projects = await Project.find({}).sort({ createdAt: -1 }).limit(6).lean();
+      projects = await Project.find(userFilter)
+        .sort({ createdAt: -1 })
+        .limit(12)
+        .lean();
     }
 
     res.json({ success: true, data: projects });
@@ -60,11 +78,12 @@ exports.getProjects = async (req, res, next) => {
     const query = { user: userId };
 
     // Search filter (text search on title, description, technologies)
-    if (search) {
+    if (search && search.trim()) {
+      const escapedSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { technologies: { $regex: search, $options: 'i' } },
+        { title: { $regex: escapedSearch, $options: 'i' } },
+        { description: { $regex: escapedSearch, $options: 'i' } },
+        { technologies: { $regex: escapedSearch, $options: 'i' } },
       ];
     }
 
@@ -167,8 +186,10 @@ exports.createProject = async (req, res, next) => {
     if (req.file) {
       imageUrl = `/uploads/${req.file.filename}`;
     } else if (req.body.imageUrl !== undefined) {
-      imageUrl = normalizeAssetUrl(req.body.imageUrl);
+      imageUrl = normalizeAssetUrl(req.body.imageUrl) || null;
     }
+
+    const isFeatured = featured === true || featured === 'true';
 
     const project = await Project.create({
       title,
@@ -179,7 +200,7 @@ exports.createProject = async (req, res, next) => {
       githubUrl: githubUrl || '',
       liveUrl: liveUrl || '',
       imageUrl,
-      featured: featured || false,
+      featured: isFeatured,
       user: req.user._id,
     });
 
@@ -211,11 +232,15 @@ exports.updateProject = async (req, res, next) => {
 
     const updateData = { ...req.body };
 
+    if (req.body.featured !== undefined) {
+      updateData.featured = req.body.featured === true || req.body.featured === 'true';
+    }
+
     // Handle uploaded image
     if (req.file) {
       updateData.imageUrl = `/uploads/${req.file.filename}`;
     } else if (req.body.imageUrl !== undefined) {
-      updateData.imageUrl = normalizeAssetUrl(req.body.imageUrl);
+      updateData.imageUrl = normalizeAssetUrl(req.body.imageUrl) || null;
     }
 
     // Remove imageUrl from body if no file and no explicit imageUrl

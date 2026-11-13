@@ -3,6 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const path = require("path");
+const fs = require("fs");
 const dotenv = require("dotenv");
 
 const connectDB = require("./config/db");
@@ -35,7 +36,7 @@ const parseOrigins = (value) =>
   value
     ? value
         .split(",")
-        .map((origin) => origin.trim())
+        .map((origin) => origin.trim().replace(/\/+$/, ""))
         .filter(Boolean)
     : ["http://localhost:5173"];
 
@@ -92,6 +93,11 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // ===============================
 // Static Uploads
 // ===============================
+const uploadDirectory = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDirectory)) {
+  fs.mkdirSync(uploadDirectory, { recursive: true });
+}
+
 app.use("/uploads", (req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
@@ -106,10 +112,11 @@ app.use("/uploads", (req, res, next) => {
   next();
 });
 
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use("/uploads", express.static(uploadDirectory));
 
 app.get("/uploads/:file", (req, res) => {
-  const uploadPath = path.join(process.cwd(), "uploads", req.params.file);
+  const safeFilename = path.basename(req.params.file);
+  const uploadPath = path.join(uploadDirectory, safeFilename);
   res.sendFile(uploadPath, (error) => {
     if (error) {
       res.status(404).json({ success: false, message: "File not found" });

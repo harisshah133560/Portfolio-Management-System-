@@ -172,6 +172,16 @@ export default function Dashboard() {
     );
   }
 
+  if (!stats) {
+    return (
+      <div className="card p-12 text-center max-w-lg mx-auto mt-12">
+        <h3 className="text-lg font-bold text-slate-800 mb-2">Unable to load dashboard data</h3>
+        <p className="text-slate-500 text-sm mb-6">Could not retrieve dashboard statistics. Please verify your connection or try again.</p>
+        <button onClick={fetchStats} className="btn-primary">Retry</button>
+      </div>
+    );
+  }
+
   return (
     <div>
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
@@ -203,9 +213,9 @@ export default function Dashboard() {
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard icon={FolderOpen} label="Total Projects" value={stats.total} color="#3B82F6" delay={1} />
-        <StatsCard icon={CheckCircle2} label="Completed" value={stats.completed} color="#10B981" delay={2} />
-        <StatsCard icon={Loader} label="In Progress" value={stats.inProgress} color="#F59E0B" delay={3} />
+        <StatsCard icon={FolderOpen} label="Total Projects" value={stats.total || 0} color="#3B82F6" delay={1} />
+        <StatsCard icon={CheckCircle2} label="Completed" value={stats.completed || 0} color="#10B981" delay={2} />
+        <StatsCard icon={Loader} label="In Progress" value={stats.inProgress || 0} color="#F59E0B" delay={3} />
         <StatsCard icon={Code2} label="Technologies" value={stats.topTechnologies ? stats.topTechnologies.length : 0} color="#8B5CF6" delay={4} />
       </div>
 

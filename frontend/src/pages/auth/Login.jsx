@@ -27,7 +27,7 @@ export default function Login() {
     setSubmitting(true);
     loginFn(email, password)
       .then(function (result) {
-        if (result.success) { toast.success('Welcome back, ' + result.data.user.name.split(' ')[0] + '!'); navigate('/', { replace: true }); }
+        if (result.success) { toast.success('Welcome back, ' + result.data.user.name.split(' ')[0] + '!'); navigate('/dashboard', { replace: true }); }
         else { setError(result.message); }
       })
       .catch(function (err) { setError(err.message || 'Login failed'); })

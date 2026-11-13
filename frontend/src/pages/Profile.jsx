@@ -130,7 +130,10 @@ export default function Profile() {
     promises.push(
       authApi.updateProfile({ name: name.trim(), bio: bio, location: loc, website: website, headline: headline, role: role, githubUrl: githubUrl, linkedinUrl: linkedinUrl, emailAddress: emailAddress, about: about, cvUrl: cvUrl })
         .then(function (res) {
-          if (res.data.success) updateUser(res.data.data);
+          if (res.data.success) {
+            updateUser(res.data.data);
+            toast.success('Profile updated successfully');
+          }
         })
         .catch(function (err) { toast.error(err.message || 'Failed to update profile'); })
     );

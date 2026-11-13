@@ -30,7 +30,7 @@ export default function Register() {
     setSubmitting(true);
     registerFn(name, email, password)
       .then(function (result) {
-        if (result.success) { toast.success('Account created successfully!'); navigate('/', { replace: true }); }
+        if (result.success) { toast.success('Account created successfully!'); navigate('/dashboard', { replace: true }); }
         else { setError(result.message); }
       })
       .catch(function (err) { setError(err.message || 'Registration failed'); })

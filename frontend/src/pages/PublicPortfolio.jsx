@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Briefcase, Code2, Github, Globe2, Linkedin, Mail, Sparkles, MonitorSmartphone, Zap } from 'lucide-react';
 import { authApi } from '../api/authApi';
@@ -31,12 +32,14 @@ export default function PublicPortfolio() {
   var profileHeadline = profile && profile.headline ? profile.headline : 'I build practical web experiences with modern tools and a strong focus on usability.';
   var profileRole = profile && profile.role ? profile.role : 'Software Developer';
   var profileAbout = profile && profile.about ? profile.about : 'I am passionate about creating clean, practical web experiences and turning ideas into polished digital products.';
-  var profileEmail = profile && profile.emailAddress ? profile.emailAddress : 'haris@example.com';
+  var profileEmail = (profile && profile.emailAddress) || (profile && profile.email) || 'haris@example.com';
   var profileGithub = profile && profile.githubUrl ? profile.githubUrl : 'https://github.com/harisshah133560';
   var profileLinkedin = profile && profile.linkedinUrl ? profile.linkedinUrl : 'https://www.linkedin.com/in/harisshah-/';
   var profileAvatar = profile && profile.avatar ? getAssetUrl(profile.avatar) : null;
   var profileCv = profile && profile.cvUrl ? getAssetUrl(profile.cvUrl) : null;
-  var skills = ['React', 'Node.js', 'MongoDB', 'Tailwind CSS', 'Express', 'REST APIs'];
+  var defaultSkills = ['React', 'Node.js', 'MongoDB', 'Tailwind CSS', 'Express', 'REST APIs'];
+  var extractedSkills = Array.from(new Set(projects.flatMap(function (p) { return p.technologies || []; }))).filter(Boolean);
+  var skills = extractedSkills.length > 0 ? extractedSkills.slice(0, 8) : defaultSkills;
   var profileInitials = profileName
     .split(' ')
     .map(function (part) { return part.charAt(0).toUpperCase(); })
@@ -52,7 +55,7 @@ export default function PublicPortfolio() {
             <a href="#about" className={"rounded-full px-3 py-1.5 transition " + (theme === 'dark' ? 'text-slate-300 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}>About</a>
             <a href="#projects" className={"rounded-full px-3 py-1.5 transition " + (theme === 'dark' ? 'text-slate-300 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}>Projects</a>
             <a href="#contact" className={"rounded-full px-3 py-1.5 transition " + (theme === 'dark' ? 'text-slate-300 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')}>Contact</a>
-            <a href={isAuthenticated ? '/dashboard' : '/login'} className={"rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition " + (theme === 'dark' ? 'border-sky-700 bg-sky-600/20 text-sky-300 hover:bg-sky-600/30' : 'border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100')}>Admin Dashboard</a>
+            <Link to={isAuthenticated ? '/dashboard' : '/login'} className={"rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition " + (theme === 'dark' ? 'border-sky-700 bg-sky-600/20 text-sky-300 hover:bg-sky-600/30' : 'border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100')}>Admin Dashboard</Link>
             <button onClick={toggleTheme} className={"rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition " + (theme === 'dark' ? 'border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50')}>
               {theme === 'dark' ? 'Light mode' : 'Dark mode'}
             </button>

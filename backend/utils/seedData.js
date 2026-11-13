@@ -1,3 +1,5 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/User');
@@ -5,7 +7,11 @@ const Project = require('../models/Project');
 
 const seedData = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+    if (!mongoUri) {
+      throw new Error('MONGO_URI or MONGODB_URI is not defined in environment variables.');
+    }
+    await mongoose.connect(mongoUri);
     console.log('MongoDB connected for seeding...');
 
     // Clear existing data

@@ -43,7 +43,7 @@ function PublicRoute(props) {
   }
 
   if (auth.isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

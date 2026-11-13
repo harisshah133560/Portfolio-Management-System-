@@ -33,10 +33,11 @@ api.interceptors.response.use(
       if (status === 401) {
         localStorage.removeItem('ph_token');
         localStorage.removeItem('ph_user');
-        if (
-          window.location.pathname !== '/login' &&
-          window.location.pathname !== '/register'
-        ) {
+        const isPublicPath =
+          window.location.pathname === '/' ||
+          window.location.pathname === '/login' ||
+          window.location.pathname === '/register';
+        if (!isPublicPath) {
           window.location.href = '/login';
         }
       }

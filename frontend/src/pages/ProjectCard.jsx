@@ -26,7 +26,7 @@ export default function ProjectCard(props) {
           alt={project.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
-          onError={function (e) { e.target.src = 'https://picsum.photos/seed/fb' + index + '/600/400'; }}
+          onError={function (e) { e.target.onerror = null; e.target.src = 'https://picsum.photos/seed/fb' + index + '/600/400'; }}
         />
         <div className="absolute top-3 right-3"><StatusBadge status={project.status} /></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-end p-3 gap-2">

@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { getAssetUrl } from '../../utils/helpers';
 
 var PAGE_NAMES = {
+  '/dashboard': 'Dashboard',
+  '/admin': 'Dashboard',
   '/': 'Dashboard',
   '/projects': 'Projects',
   '/projects/new': 'Add Project',
