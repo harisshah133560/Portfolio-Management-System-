@@ -91,7 +91,9 @@ export default function PublicPortfolio() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <a href="#projects" className="btn-primary">View Projects <ArrowRight className="w-4 h-4" /></a>
                 {profileCv ? (
-                  <a href={profileCv} target="_blank" rel="noreferrer" className="btn-secondary">Download CV</a>
+                  <a href={profileCv} target="_blank" rel="noreferrer" download className="btn-secondary">
+                    <Briefcase className="w-4 h-4 text-sky-600" /> Download CV
+                  </a>
                 ) : (
                   <a href="#contact" className="btn-secondary">Get in Touch</a>
                 )}
@@ -140,6 +142,19 @@ export default function PublicPortfolio() {
                 <div className={"flex items-center gap-2 font-semibold " + (theme === 'dark' ? 'text-slate-100' : 'text-slate-900')}><Code2 className="w-4 h-4 text-sky-600" /> Clean, maintainable code</div>
               </div>
             </div>
+            {profileCv && (
+              <div className="mt-6">
+                <a
+                  href={profileCv}
+                  target="_blank"
+                  rel="noreferrer"
+                  download
+                  className="btn-primary"
+                >
+                  <Briefcase className="w-4 h-4" /> Download Resume / CV
+                </a>
+              </div>
+            )}
           </div>
           <div className={"card p-8 lg:p-10 " + (theme === 'dark' ? 'bg-slate-900 border-slate-800' : '')}>
             <div className="flex items-center gap-3">
@@ -153,6 +168,17 @@ export default function PublicPortfolio() {
               Reach out for collaborations, freelance work, or new product opportunities.
             </p>
             <div className="mt-4 space-y-3">
+              {profileCv && (
+                <a
+                  href={profileCv}
+                  target="_blank"
+                  rel="noreferrer"
+                  download
+                  className={"flex items-center gap-3 rounded-2xl border px-4 py-3 font-semibold transition " + (theme === 'dark' ? 'border-sky-800 bg-sky-950/40 text-sky-300 hover:bg-sky-900/60' : 'border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100')}
+                >
+                  <Briefcase className="w-5 h-5 text-sky-600" /> Download Resume / CV
+                </a>
+              )}
               <a href={'mailto:' + profileEmail} className={"flex items-center gap-3 rounded-2xl border px-4 py-3 transition " + (theme === 'dark' ? 'border-slate-800 bg-slate-800/70 text-slate-200 hover:border-sky-500 hover:bg-slate-700' : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-sky-200 hover:bg-sky-50')}>
                 <Mail className="w-5 h-5" /> {profileEmail}
               </a>

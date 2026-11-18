@@ -225,7 +225,7 @@ exports.uploadAvatar = async function (req, res, next) {
 
     res.status(200).json({
       success: true,
-      data: { avatar: user.avatar },
+      data: { avatar: user.avatar, user },
       message: "Avatar uploaded successfully",
     });
   } catch (error) {
@@ -251,7 +251,7 @@ exports.uploadCv = async function (req, res, next) {
 
     res.status(200).json({
       success: true,
-      data: { cvUrl: user.cvUrl },
+      data: { cvUrl: user.cvUrl, user },
       message: "CV uploaded successfully",
     });
   } catch (error) {
@@ -278,9 +278,30 @@ exports.deleteAccount = async function (req, res, next) {
 exports.getPublicProfile = async function (req, res, next) {
   try {
     const userId = req.params.userId || req.query.userId;
-    const user = userId
-      ? await User.findById(userId)
-      : await User.findOne({}).sort({ createdAt: -1 });
+    let user = null;
+
+    if (userId) {
+      user = await User.findById(userId).select("-password");
+    } else if (process.env.ADMIN_EMAIL) {
+      user = await User.findOne({ email: process.env.ADMIN_EMAIL.toLowerCase().trim() }).select("-password");
+    }
+
+    if (!user) {
+      // Prioritize the user who has active profile details configured, most recently updated
+      user = await User.findOne({
+        $or: [
+          { cvUrl: { $exists: true, $ne: "" } },
+          { headline: { $exists: true, $ne: "" } },
+          { about: { $exists: true, $ne: "" } },
+        ],
+      })
+        .sort({ updatedAt: -1 })
+        .select("-password");
+    }
+
+    if (!user) {
+      user = await User.findOne({}).sort({ updatedAt: -1 }).select("-password");
+    }
 
     if (!user) {
       return res.status(404).json({

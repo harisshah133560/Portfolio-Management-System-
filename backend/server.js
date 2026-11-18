@@ -5,6 +5,7 @@ const rateLimit = require("express-rate-limit");
 const path = require("path");
 const fs = require("fs");
 const dotenv = require("dotenv");
+const mongoose = require("mongoose");
 
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
@@ -146,9 +147,13 @@ app.use("/api/projects", require("./routes/projects"));
 // Health Check
 // ===============================
 app.get("/api/health", (req, res) => {
+  const dbReadyStates = ["disconnected", "connected", "connecting", "disconnecting"];
+  const dbStatus = dbReadyStates[mongoose.connection.readyState] || "unknown";
+
   res.status(200).json({
     success: true,
     message: "PortfolioHub API is running",
+    database: dbStatus,
     environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
   });

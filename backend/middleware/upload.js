@@ -42,13 +42,20 @@ const fileFilter = (req, file, cb) => {
 
   const allowedDocs = [
     "application/pdf",
+    "application/x-pdf",
+    "application/acrobat",
+    "applications/vnd.pdf",
+    "text/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
+  const ext = path.extname(file.originalname).toLowerCase();
+  const allowedDocExts = [".pdf", ".doc", ".docx"];
+
   // CV Upload
   if (file.fieldname === "cv") {
-    if (allowedDocs.includes(file.mimetype)) {
+    if (allowedDocs.includes(file.mimetype) || allowedDocExts.includes(ext)) {
       return cb(null, true);
     }
 

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -11,6 +11,10 @@ export default function Profile() {
   var updateUser = auth.updateUser;
   var toast = useToast();
   var fileInputRef = useRef(null);
+
+  var loadingProfileState = useState(true);
+  var loadingProfile = loadingProfileState[0];
+  var setLoadingProfile = loadingProfileState[1];
 
   var nameState = useState(user ? user.name : '');
   var name = nameState[0]; var setName = nameState[1];
@@ -53,6 +57,33 @@ export default function Profile() {
 
   var avatarUrl = getAssetUrl(user && user.avatar ? user.avatar : null, 'https://ui-avatars.com/api/?name=' + encodeURIComponent((user && user.name) || 'U') + '&background=2563EB&color=fff&size=200&bold=true');
 
+  useEffect(function () {
+    authApi.getMe()
+      .then(function (res) {
+        if (res.data && res.data.success && res.data.data) {
+          var u = res.data.data;
+          updateUser(u);
+          setName(u.name || '');
+          setBio(u.bio || '');
+          setLoc(u.location || '');
+          setWebsite(u.website || '');
+          setHeadline(u.headline || '');
+          setRole(u.role || '');
+          setGithubUrl(u.githubUrl || '');
+          setLinkedinUrl(u.linkedinUrl || '');
+          setEmailAddress(u.emailAddress || '');
+          setAbout(u.about || '');
+          setCvUrl(u.cvUrl || '');
+        }
+      })
+      .catch(function (err) {
+        console.error('Failed to load profile details:', err);
+      })
+      .finally(function () {
+        setLoadingProfile(false);
+      });
+  }, []);
+
   var handleAvatarUpload = function (e) {
     var file = e.target.files[0];
     if (!file) return;
@@ -82,20 +113,21 @@ export default function Profile() {
     var file = e.target.files[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) { toast.error('CV must be under 10MB'); return; }
-    toast.info('Uploading CV...');
+    toast.info('Uploading CV document...');
     var formData = new FormData();
     formData.append('cv', file);
     authApi.uploadCv(formData)
       .then(function (res) {
         if (res && res.data && res.data.success) {
           var updated = Object.assign({}, user);
-          updated.cvUrl = res.data.data.cvUrl;
+          var uploadedUrl = res.data.data.cvUrl;
+          updated.cvUrl = uploadedUrl;
           updateUser(updated);
-          setCvUrl(res.data.data.cvUrl);
-          toast.success('CV uploaded successfully');
+          setCvUrl(uploadedUrl);
+          toast.success('CV file uploaded successfully');
         }
       })
-      .catch(function () { toast.error('Failed to upload CV'); });
+      .catch(function (err) { toast.error(err.message || 'Failed to upload CV'); });
   };
 
   var checkPwStrength = function (pw) {
@@ -128,11 +160,35 @@ export default function Profile() {
 
     // Update profile
     promises.push(
-      authApi.updateProfile({ name: name.trim(), bio: bio, location: loc, website: website, headline: headline, role: role, githubUrl: githubUrl, linkedinUrl: linkedinUrl, emailAddress: emailAddress, about: about, cvUrl: cvUrl })
+      authApi.updateProfile({
+        name: name.trim(),
+        bio: bio,
+        location: loc,
+        website: website,
+        headline: headline,
+        role: role,
+        githubUrl: githubUrl,
+        linkedinUrl: linkedinUrl,
+        emailAddress: emailAddress,
+        about: about,
+        cvUrl: cvUrl ? cvUrl.trim() : '',
+      })
         .then(function (res) {
           if (res.data.success) {
-            updateUser(res.data.data);
-            toast.success('Profile updated successfully');
+            var u = res.data.data;
+            updateUser(u);
+            setName(u.name || '');
+            setBio(u.bio || '');
+            setLoc(u.location || '');
+            setWebsite(u.website || '');
+            setHeadline(u.headline || '');
+            setRole(u.role || '');
+            setGithubUrl(u.githubUrl || '');
+            setLinkedinUrl(u.linkedinUrl || '');
+            setEmailAddress(u.emailAddress || '');
+            setAbout(u.about || '');
+            setCvUrl(u.cvUrl || '');
+            toast.success('Profile and CV updated permanently');
           }
         })
         .catch(function (err) { toast.error(err.message || 'Failed to update profile'); })
@@ -152,6 +208,23 @@ export default function Profile() {
 
     Promise.all(promises).finally(function () { setSubmitting(false); });
   };
+
+  if (loadingProfile) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="card p-8 text-center animate-pulse">
+          <div className="w-28 h-28 rounded-full bg-slate-200 mx-auto mb-4" />
+          <div className="w-48 h-6 rounded bg-slate-200 mx-auto mb-2" />
+          <div className="w-32 h-4 rounded bg-slate-200 mx-auto" />
+        </div>
+        <div className="card p-6 space-y-4 animate-pulse">
+          <div className="w-40 h-5 rounded bg-slate-200 mb-4" />
+          <div className="w-full h-10 rounded bg-slate-200" />
+          <div className="w-full h-24 rounded bg-slate-200" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -237,21 +310,71 @@ export default function Profile() {
           </div>
         </motion.div>
 
-        {/* CV Upload */}
+        {/* CV Link & Upload */}
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="card p-6">
-          <h3 className="text-sm font-bold text-slate-900 mb-4">Resume / CV</h3>
+          <h3 className="text-sm font-bold text-slate-900 mb-2">Resume / CV</h3>
+          <p className="text-xs text-slate-500 mb-4">
+            Provide a permanent link to your CV (Google Drive, Dropbox, or hosted file) or upload a document. The link will power the "Download CV" button on your portfolio.
+          </p>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Upload your CV</label>
-              <input type="file" accept=".pdf,.doc,.docx" onChange={handleCvUpload} className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-              <p className="text-xs text-slate-400 mt-2">Supported formats: PDF, DOC, DOCX</p>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                CV Direct Link (URL) <span className="text-sky-600 font-normal">(Recommended for permanent cloud hosting)</span>
+              </label>
+              <input
+                type="url"
+                value={cvUrl}
+                onChange={function (e) { setCvUrl(e.target.value); }}
+                placeholder="https://drive.google.com/file/... or https://..."
+                className="input-field"
+              />
+              <p className="text-xs text-slate-400 mt-1">
+                Tip: If using Google Drive, make sure the link sharing setting is set to "Anyone with the link can view".
+              </p>
             </div>
+
+            <div className="pt-2 border-t border-slate-100">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Or Upload CV File (PDF / Word)
+              </label>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={handleCvUpload}
+                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+              <p className="text-xs text-slate-400 mt-2">Supported formats: PDF, DOC, DOCX up to 10MB</p>
+            </div>
+
             {resolvedCvUrl ? (
-              <a href={resolvedCvUrl} target="_blank" rel="noreferrer" className="inline-flex items-center text-sm font-semibold text-blue-700 hover:text-blue-800">
-                View uploaded CV
-              </a>
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-sky-50/80 border border-sky-100 text-sm">
+                <div className="flex items-center gap-2 truncate mr-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                  <span className="text-slate-600 truncate">
+                    Active CV: <strong className="text-slate-800">{cvUrl}</strong>
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <a
+                    href={resolvedCvUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    download
+                    className="inline-flex items-center font-semibold text-sky-700 hover:text-sky-800 transition-colors"
+                  >
+                    Test / Open CV &rarr;
+                  </a>
+                  <button
+                    type="button"
+                    onClick={function () { setCvUrl(''); }}
+                    className="text-xs font-semibold text-red-600 hover:text-red-700 transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
             ) : (
-              <p className="text-sm text-slate-500">No CV uploaded yet.</p>
+              <p className="text-xs text-slate-400 italic">No CV link or file assigned yet.</p>
             )}
           </div>
         </motion.div>

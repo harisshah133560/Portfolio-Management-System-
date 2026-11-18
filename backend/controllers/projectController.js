@@ -32,8 +32,22 @@ exports.getPublicProjects = async (req, res, next) => {
     const userId = req.params.userId || req.query.userId;
     if (userId) {
       userFilter = { user: userId };
-    } else {
-      const publicUser = await User.findOne({}).sort({ createdAt: -1 });
+    } else if (process.env.ADMIN_EMAIL) {
+      const adminUser = await User.findOne({ email: process.env.ADMIN_EMAIL.toLowerCase().trim() });
+      if (adminUser) userFilter = { user: adminUser._id };
+    }
+
+    if (!userFilter.user) {
+      const publicUser =
+        (await User.findOne({
+          $or: [
+            { cvUrl: { $exists: true, $ne: "" } },
+            { headline: { $exists: true, $ne: "" } },
+            { about: { $exists: true, $ne: "" } },
+          ],
+        }).sort({ updatedAt: -1 })) ||
+        (await User.findOne({}).sort({ updatedAt: -1 }));
+
       if (publicUser) {
         userFilter = { user: publicUser._id };
       }
