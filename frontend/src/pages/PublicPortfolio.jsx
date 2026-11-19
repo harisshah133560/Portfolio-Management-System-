@@ -67,7 +67,15 @@ export default function PublicPortfolio() {
             <div className="max-w-2xl">
               <div className="mb-6 flex items-center gap-4">
                 {profileAvatar ? (
-                  <img src={profileAvatar} alt={profileName} className="h-20 w-20 rounded-full object-cover ring-4 ring-sky-200 shadow-lg" />
+                  <img
+                    src={profileAvatar}
+                    alt={profileName}
+                    className="h-20 w-20 rounded-full object-cover ring-4 ring-sky-200 shadow-lg"
+                    onError={function (e) {
+                      e.target.onerror = null;
+                      e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(profileName || 'U') + '&background=2563EB&color=fff&size=200&bold=true';
+                    }}
+                  />
                 ) : (
                   <div className={"flex h-20 w-20 items-center justify-center rounded-full border text-xl font-bold shadow-lg " + (theme === 'dark' ? 'border-slate-700 bg-slate-800 text-slate-100' : 'border-slate-200 bg-white text-slate-800')}>
                     {profileInitials}
@@ -214,7 +222,15 @@ export default function PublicPortfolio() {
                 return (
                   <motion.article key={project._id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} className={"card overflow-hidden " + (theme === 'dark' ? 'bg-slate-900 border-slate-800' : '')}>
                     <div className="h-44 bg-slate-100">
-                      <img src={getAssetUrl(project.imageUrl, 'https://picsum.photos/seed/' + project._id + '/600/400')} alt={project.title} className="h-full w-full object-cover" />
+                      <img
+                        src={getAssetUrl(project.imageUrl, 'https://picsum.photos/seed/' + project._id + '/600/400')}
+                        alt={project.title}
+                        className="h-full w-full object-cover"
+                        onError={function (e) {
+                          e.target.onerror = null;
+                          e.target.src = 'https://picsum.photos/seed/' + project._id + '/600/400';
+                        }}
+                      />
                     </div>
                     <div className="p-5">
                       <div className={"flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] " + (theme === 'dark' ? 'text-slate-400' : 'text-slate-400')}>

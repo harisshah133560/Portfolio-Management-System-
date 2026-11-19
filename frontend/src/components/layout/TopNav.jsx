@@ -52,7 +52,15 @@ export default function TopNav(props) {
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full"></span>
           </button>
           <button onClick={function () { navigate('/profile'); }} className="flex items-center gap-2.5 pl-3 border-l border-slate-200 hover:opacity-80 transition-opacity">
-            <img src={avatarUrl} alt={user ? user.name : 'User'} className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-sm" />
+            <img
+              src={avatarUrl}
+              alt={user ? user.name : 'User'}
+              className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-sm"
+              onError={function (e) {
+                e.target.onerror = null;
+                e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent((user && user.name) || 'U') + '&background=2563EB&color=fff&size=80&bold=true';
+              }}
+            />
             <div className="hidden md:block text-left">
               <p className="text-sm font-semibold text-slate-800 leading-tight">{user ? user.name : ''}</p>
               <p className="text-xs text-slate-400 leading-tight">{user ? user.email : ''}</p>

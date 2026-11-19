@@ -10,6 +10,10 @@ const normalizeAssetUrl = (value) => {
   const trimmedValue = value.trim();
   if (!trimmedValue) return "";
 
+  if (trimmedValue.startsWith("data:image/")) {
+    return trimmedValue;
+  }
+
   if (/^https?:\/\//i.test(trimmedValue)) {
     try {
       const parsedUrl = new URL(trimmedValue);
@@ -209,14 +213,18 @@ exports.changePassword = async function (req, res, next) {
 
 exports.uploadAvatar = async function (req, res, next) {
   try {
-    if (!req.file) {
+    let avatarUrl = "";
+    if (req.file) {
+      avatarUrl = `/uploads/${req.file.filename}`;
+    } else if (req.body && req.body.avatar) {
+      avatarUrl = normalizeAssetUrl(req.body.avatar);
+    } else {
       return res.status(400).json({
         success: false,
-        message: "No avatar file uploaded",
+        message: "No avatar file or URL provided",
       });
     }
 
-    const avatarUrl = `/uploads/${req.file.filename}`;
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { avatar: avatarUrl },

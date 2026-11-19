@@ -111,10 +111,18 @@ export default function ProjectForm() {
   var handleImageSelect = function (file) {
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return; }
-    setImageFile(file);
-    compressImage(file).then(function (compressed) {
-      setImagePreview(compressed);
-    });
+    compressImage(file, 800, 0.75)
+      .then(function (compressed) {
+        setImagePreview(compressed);
+        setForm(function (prev) {
+          return Object.assign({}, prev, { imageUrl: compressed });
+        });
+        setImageFile(null);
+      })
+      .catch(function (err) {
+        console.error('Image compression failed:', err);
+        toast.error('Failed to process image');
+      });
   };
 
   var handleDragOver = function (e) { e.preventDefault(); if (dropZoneRef.current) dropZoneRef.current.classList.add('border-blue-400', 'bg-blue-50'); };
@@ -150,18 +158,12 @@ export default function ProjectForm() {
       techs.forEach(function (t) { formData.append('technologies', t); });
     }
 
-    if (imageFile) {
-      formData.append('image', imageFile);
-    } else if (imagePreview && imagePreview.indexOf('data:') === 0) {
-      var byteString = atob(imagePreview.split(',')[1]);
-      var mimeString = imagePreview.split(',')[0].split(':')[1].split(';')[0];
-      var ab = new ArrayBuffer(byteString.length);
-      var ia = new Uint8Array(ab);
-      for (var i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); }
-      var blob = new Blob([ab], { type: mimeString });
-      formData.append('image', blob, 'image.jpg');
+    if (form.imageUrl) {
+      formData.append('imageUrl', form.imageUrl);
+    } else if (imagePreview) {
+      formData.append('imageUrl', imagePreview);
     } else {
-      formData.append('imageUrl', form.imageUrl || '');
+      formData.append('imageUrl', '');
     }
 
     var apiCall = isEdit ? projectApi.updateProject(id, formData) : projectApi.createProject(formData);
@@ -300,17 +302,47 @@ export default function ProjectForm() {
             className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center cursor-pointer transition-all hover:border-blue-300 hover:bg-blue-50/50"
           >
             {imagePreview ? (
-              <img src={getAssetUrl(imagePreview)} alt="Preview" className="max-h-64 mx-auto rounded-lg mb-4 object-cover" />
+              <img
+                src={getAssetUrl(imagePreview)}
+                alt="Preview"
+                className="max-h-64 mx-auto rounded-lg mb-4 object-cover"
+                onError={function (e) {
+                  e.target.onerror = null;
+                  e.target.src = 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80';
+                }}
+              />
             ) : (
               <div>
                 <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4"><UploadCloud className="w-8 h-8 text-slate-300" /></div>
                 <p className="text-sm font-medium text-slate-700 mb-1">Drop your image here or click to browse</p>
-                <p className="text-xs text-slate-400">PNG, JPG, or WebP up to 5MB</p>
+                <p className="text-xs text-slate-400">PNG, JPG, or WebP up to 5MB (compressed & stored permanently)</p>
               </div>
             )}
             <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={function (e) { if (e.target.files[0]) handleImageSelect(e.target.files[0]); }} className="hidden" aria-label="Upload project image" />
           </div>
-          {imagePreview && <button type="button" onClick={removeImage} className="mt-3 text-sm text-red-500 hover:text-red-600 font-medium transition-colors">Remove image</button>}
+
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+              Or Image URL (Cloudinary, Unsplash, hosted image link)
+            </label>
+            <input
+              name="imageUrl"
+              value={form.imageUrl && !form.imageUrl.startsWith('data:image/') ? form.imageUrl : ''}
+              onChange={function (e) {
+                var urlVal = e.target.value.trim();
+                setForm(function (prev) { return Object.assign({}, prev, { imageUrl: urlVal }); });
+                setImagePreview(urlVal);
+              }}
+              placeholder="https://images.unsplash.com/... or https://..."
+              className="input-field text-sm"
+            />
+          </div>
+
+          {imagePreview && (
+            <button type="button" onClick={removeImage} className="mt-3 text-sm text-red-500 hover:text-red-600 font-medium transition-colors">
+              Remove image
+            </button>
+          )}
         </motion.div>
 
         <div className="flex items-center justify-end gap-3 pt-2 pb-8">

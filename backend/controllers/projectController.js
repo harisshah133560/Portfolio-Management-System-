@@ -7,6 +7,10 @@ const normalizeAssetUrl = (value) => {
   const trimmedValue = value.trim();
   if (!trimmedValue) return '';
 
+  if (trimmedValue.startsWith('data:image/')) {
+    return trimmedValue;
+  }
+
   if (/^https?:\/\//i.test(trimmedValue)) {
     try {
       const parsedUrl = new URL(trimmedValue);
